@@ -89,7 +89,7 @@ pub fn stop_global_event_stream(app_type: String) {
 pub enum EventToUI {
     Event(String),
     Rgba(usize),
-    Texture(usize),
+    Texture(usize, bool), // (display, gpu_texture)
 }
 
 pub fn host_stop_system_key_propagate(_stopped: bool) {
@@ -1617,6 +1617,14 @@ pub fn main_check_super_user_permission() -> bool {
     check_super_user_permission()
 }
 
+pub fn main_get_unlock_pin() -> SyncReturn<String> {
+    SyncReturn(get_unlock_pin())
+}
+
+pub fn main_set_unlock_pin(pin: String) -> SyncReturn<String> {
+    SyncReturn(set_unlock_pin(pin))
+}
+
 pub fn main_check_mouse_time() {
     check_mouse_time();
 }
@@ -1841,6 +1849,10 @@ pub fn install_install_path() -> SyncReturn<String> {
     SyncReturn(install_path())
 }
 
+pub fn install_install_options() -> SyncReturn<String> {
+    SyncReturn(install_options())
+}
+
 pub fn main_account_auth(op: String, remember_me: bool) {
     let id = get_id();
     let uuid = get_uuid();
@@ -1964,6 +1976,12 @@ pub fn is_preset_password() -> bool {
             #[cfg(any(target_os = "android", target_os = "ios"))]
             return p == &config::Config::get_permanent_password();
         })
+}
+
+// Don't call this function for desktop version.
+// We need this function because we want a sync return for mobile version.
+pub fn is_preset_password_mobile_only() -> SyncReturn<bool> {
+    SyncReturn(is_preset_password())
 }
 
 /// Send a url scheme through the ipc.
@@ -2214,7 +2232,7 @@ pub fn main_get_hard_option(key: String) -> SyncReturn<String> {
 }
 
 pub fn main_get_buildin_option(key: String) -> SyncReturn<String> {
-    SyncReturn(get_buildin_option(&key))
+    SyncReturn(get_builtin_option(&key))
 }
 
 pub fn main_check_hwcodec() {
